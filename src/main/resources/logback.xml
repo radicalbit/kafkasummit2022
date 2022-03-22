@@ -1,0 +1,24 @@
+<!-- https://www.playframework.com/documentation/latest/SettingsLogger -->
+<configuration>
+
+    <variable name="LOG_LEVEL" value="${LOG_LEVEL:-INFO}"/>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>[%-5p] %d [%C] [%X{operatorName}] - %m%n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="org.apache.kafka" level="INFO"/>
+    <!-- Off these because they are way too verbose -->
+    <logger name="org.apache.kafka.clients.consumer.internals" level="OFF"/>
+    <logger name="org.apache.kafka.clients.NetworkClient" level="OFF"/>
+    <logger name="cakesolutions.kafka.akka.KafkaConsumerActorImpl" level="OFF"/>
+
+    <root level="${LOG_LEVEL}">
+        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="KAFKA"/>
+    </root>
+
+
+</configuration>

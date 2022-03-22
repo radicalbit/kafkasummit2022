@@ -1,0 +1,53 @@
+apiVersion: machinelearning.seldon.io/v1
+kind: SeldonDeployment
+metadata:
+  name: betting-model-kafka
+  namespace: kafkasummit
+spec:
+  annotations:
+    proxy.istio.io/config: '{ "holdApplicationUntilProxyStarts": true }'
+  name: betting-model
+  serverType: kafka
+  transport: rest
+  predictors:
+  - annotations:
+      prometheus.io/port: '8000'
+    graph:
+      implementation: MLFLOW_SERVER
+      modelUri: gcs:kafkasummit2022/livebetting_model
+      name: classifier
+      envSecretRefName: seldon-rclone-secret
+      # parameters: uncomment to use pd.DataFrame
+      #   - name: xtype
+      #     type: STRING
+      #     value: DataFrame
+    name: default
+    replicas: 1
+    componentSpecs:
+      - spec:
+          containers:
+            - name: classifier
+              readinessProbe:
+                failureThreshold: 10
+                initialDelaySeconds: 120
+                periodSeconds: 30
+                successThreshold: 1
+                tcpSocket:
+                  port: 9000
+                timeoutSeconds: 3
+              livenessProbe:
+                failureThreshold: 10
+                initialDelaySeconds: 120
+                periodSeconds: 30
+                successThreshold: 1
+                tcpSocket:
+                  port: 9000
+                timeoutSeconds: 3
+    svcOrchSpec:
+      env:
+      - name: KAFKA_BROKER
+        value: ks22-brokers-kafka-bootstrap.kafka.svc.cluster.local:9092
+      - name: KAFKA_INPUT_TOPIC
+        value: model-input
+      - name: KAFKA_OUTPUT_TOPIC
+        value: model-output

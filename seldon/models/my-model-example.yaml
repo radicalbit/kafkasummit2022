@@ -1,0 +1,45 @@
+apiVersion: machinelearning.seldon.io/v1
+kind: SeldonDeployment
+metadata:
+  name: iris-model
+  namespace: kafkasummit
+spec:
+  name: iris-model
+  annotations:
+   seldon.io/istio-gateway: mesh # NOTE
+   seldon.io/istio-host: iris-model-srv # NOTE
+  predictors:
+  - annotations:
+      prometheus.io/port: '8000'
+      seldon.io/svc-name: iris-model-srv # NOTE
+    graph:
+      implementation: MLFLOW_SERVER
+      modelUri: gcs:kafkasummit2022/livebetting_model
+      name: classifier
+      envSecretRefName: seldon-rclone-secret
+      # parameters:
+      #   - name: xtype
+      #     type: STRING
+      #     value: DataFrame
+    name: default
+    replicas: 1
+    componentSpecs:
+      - spec:
+          containers:
+            - name: classifier
+              readinessProbe:
+                failureThreshold: 10
+                initialDelaySeconds: 120
+                periodSeconds: 30
+                successThreshold: 1
+                tcpSocket:
+                  port: 9000
+                timeoutSeconds: 3
+              livenessProbe:
+                failureThreshold: 10
+                initialDelaySeconds: 120
+                periodSeconds: 30
+                successThreshold: 1
+                tcpSocket:
+                  port: 9000
+                timeoutSeconds: 3

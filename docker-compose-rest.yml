@@ -1,0 +1,23 @@
+version: '3.4'
+
+services:
+
+  kafkasummit2022rest:
+    image: ${image_name}:${project_version}<localBuild>
+    restart: always
+    environment:
+      RUN_MODE: rest
+      HOSTNAME: http://mock-server:1080
+      NAMESPACE: demo
+      MODEL_NAME: iris
+    depends_on:
+      - mock-server
+
+  mock-server:
+    image: mockserver/mockserver:5.13.0
+    ports:
+      - 8080:1080
+    environment:
+      MOCKSERVER_INITIALIZATION_JSON_PATH: /config/init.json
+    volumes:
+      - ./mockserver/init.json:/config/init.json

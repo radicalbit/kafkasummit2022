@@ -1,0 +1,64 @@
+version: '3.4'
+
+services:
+
+  kafkasummit2022kafka:
+    image: ${image_name}:${project_version}<localBuild>
+    restart: always
+    environment:
+      RUN_MODE: kafka
+      STREAM_INPUT_TOPIC: model-input
+      BOOTSTRAP_SERVERS: kafka:9092
+      INPUT_TOPIC: model-input
+    depends_on:
+      - kafka
+
+  kafkasummit2022job:
+    image: ${image_name}:${project_version}<localBuild>
+    restart: always
+    environment:
+      RUN_MODE: job
+      STREAM_INPUT_TOPIC: model-input
+      BOOTSTRAP_SERVERS: kafka:9092
+    depends_on:
+      - kafka
+
+  kafka:
+    image: confluentinc/cp-enterprise-kafka:5.4.1
+    restart: always
+    labels:
+      traefik.enable: "false"
+    hostname: kafka
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "10"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_JMX_PORT: 5555
+      CONFLUENT_SUPPORT_METRICS_ENABLE: "false"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    ports:
+      - 9092:9092
+    depends_on:
+      - zookeeper
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:5.4.1
+    restart: always
+    labels:
+      traefik.enable: "false"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "10"
+    environment:
+      ZOOKEEPER_SERVER_ID: 1
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_SERVERS: zookeeper:2888:3888
+    ports:
+      - 2181:2181

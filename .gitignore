@@ -1,0 +1,23 @@
+# gitignore
+.idea/
+
+### SBT ###
+# Simple Build Tool
+# http://www.scala-sbt.org/release/docs/Getting-Started/Directories.html#configuring-version-control
+seldon/secrets/
+dist/*
+target/
+lib_managed/
+src_managed/
+project/boot/
+project/plugins/project/
+project/target/
+.history
+.cache
+.lib/
+.bsp/
+.gradle/
+
+Jenkinsfile
+
+.DS_Store

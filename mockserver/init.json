@@ -1,0 +1,21 @@
+[
+  {
+    "httpRequest": {
+      "path": "/seldon/demo/iris/api/v1.0/predictions",
+      "method": "POST"
+    },
+    "httpResponse": {
+      "body": {
+        "jsonData": {
+          "quote": 2.3,
+          "winner": "Milan"
+        },
+        "meta": {
+          "requestPath": {
+            "classifier": "seldonio/mlflowserver:1.13.1"
+          }
+        }
+      }
+    }
+  }
+]

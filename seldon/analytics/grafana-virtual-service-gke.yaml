@@ -1,0 +1,19 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: grafana
+  namespace: seldon-system
+spec:
+  gateways:
+    - istio-system/seldon-gateway
+  hosts:
+    - grafana.gke.kafkasummit.io
+  http:
+    - match:
+        - uri:
+            prefix: /
+      route:
+        - destination:
+            host: seldon-core-analytics-grafana.seldon-system.svc.cluster.local
+            port:
+              number: 80

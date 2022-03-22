@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "kafkasummit2022.fullname" . }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "kafkasummit2022.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "kafkasummit2022.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "kafkasummit2022.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- if .Values.image.pullSecrets }}
+      imagePullSecrets:
+        {{- range .Values.image.pullSecrets }}
+        - name: {{ . }}
+        {{- end }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          env:
+            - name: BOOTSTRAP_SERVERS
+              value: {{ .Values.config.bootstrapServer  | quote }}
+            - name: INPUT_TOPIC
+              value: {{ .Values.config.inputTopic  | quote }}
+            - name: STREAM_INPUT_TOPIC
+              value: {{ .Values.config.outputTopic | quote }}
+            - name: RUN_MODE
+              value: {{ .Values.config.mode | quote }}
+            - name: HOSTNAME
+              value: {{ .Values.config.hostname | quote }}
+            - name: NAMESPACE
+              value: {{ .Values.config.namespace | quote }}
+            - name: MODEL_NAME
+              value: {{ .Values.config.modelName | quote }}
+            - name: IS_ISTIO
+              value: {{ .Values.config.isIstio | quote }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
